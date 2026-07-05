@@ -54,6 +54,7 @@ jobs:
 
   deploy-backend:
     runs-on: ubuntu-latest
+    if: ${{ secrets.HF_TOKEN != '' }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
