@@ -7,7 +7,7 @@ export default defineConfig(({ mode }) => {
 
   return {
     plugins: [react()],
-    base: process.env.GITHUB_ACTIONS ? `/${repoName}/` : "/",
+     base: "/",
     server: {
       port: 3000,
       proxy: {
