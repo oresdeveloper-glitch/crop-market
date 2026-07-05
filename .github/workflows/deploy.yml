@@ -34,7 +34,6 @@ jobs:
         working-directory: frontend
         env:
           GITHUB_ACTIONS: true
-          VITE_API_URL: ${{ secrets.VITE_API_URL }}
         run: npm run build
 
       - name: Upload frontend artifact
@@ -55,7 +54,6 @@ jobs:
 
   deploy-backend:
     runs-on: ubuntu-latest
-    if: ${{ secrets.HF_TOKEN != '' && secrets.HF_SPACE != '' }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
