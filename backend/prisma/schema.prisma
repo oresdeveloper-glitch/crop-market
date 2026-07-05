@@ -1,0 +1,139 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id           String   @id @default(cuid())
+  fullName     String   @map("full_name")
+  phone        String?  @unique
+  email        String?  @unique
+  passwordHash String   @map("password_hash")
+  role         String   @default("FARMER")
+  createdAt    DateTime @default(now()) @map("created_at")
+
+  farmer Farmer?
+  buyer  Buyer?
+
+  @@map("users")
+}
+
+model Farmer {
+  id                 String   @id @default(cuid())
+  userId             String   @unique @map("user_id")
+  user               User     @relation(fields: [userId], references: [id])
+  farmLocation       String?  @map("farm_location")
+  region             String?
+  mainCrop           String?  @map("main_crop")
+  verificationStatus String   @default("PENDING") @map("verification_status")
+
+  devices      Device[]
+  cropListings CropListing[]
+
+  @@map("farmers")
+}
+
+model Buyer {
+  id           String  @id @default(cuid())
+  userId       String  @unique @map("user_id")
+  user         User    @relation(fields: [userId], references: [id])
+  businessName String? @map("business_name")
+  buyerType    String? @map("buyer_type")
+  location     String?
+
+  orders Order[]
+
+  @@map("buyers")
+}
+
+model Device {
+  id         String    @id @default(cuid())
+  farmerId   String    @map("farmer_id")
+  farmer     Farmer    @relation(fields: [farmerId], references: [id])
+  deviceCode String    @unique @map("device_code")
+  deviceType String?   @map("device_type")
+  status     String    @default("ACTIVE")
+  lastSeen   DateTime? @map("last_seen")
+
+  sensorData SensorData[]
+
+  @@map("devices")
+}
+
+model CropListing {
+  id           String    @id @default(cuid())
+  farmerId     String    @map("farmer_id")
+  farmer       Farmer    @relation(fields: [farmerId], references: [id])
+  cropName     String    @map("crop_name")
+  quantityKg   Float     @map("quantity_kg")
+  pricePerKg   Float     @map("price_per_kg")
+  location     String?
+  imageUrl     String?   @map("image_url")
+  description  String?
+  qualityGrade String?   @map("quality_grade")
+  qualityScore Float?    @map("quality_score")
+  status       String    @default("AVAILABLE")
+  createdAt    DateTime  @default(now()) @map("created_at")
+
+  sensorData         SensorData[]
+  qualityAssessments QualityAssessment[]
+  orders             Order[]
+
+  @@map("crop_listings")
+}
+
+model SensorData {
+  id          String   @id @default(cuid())
+  cropId      String   @map("crop_id")
+  crop        CropListing @relation(fields: [cropId], references: [id])
+  deviceId    String   @map("device_id")
+  device      Device   @relation(fields: [deviceId], references: [id])
+  temperature Float?
+  humidity    Float?
+  moisture    Float?
+  colorScore  Float?   @map("color_score")
+  gasLevel    Float?   @map("gas_level")
+  weightKg    Float?   @map("weight_kg")
+  recordedAt  DateTime @default(now()) @map("recorded_at")
+
+  @@map("sensor_data")
+}
+
+model QualityAssessment {
+  id             String   @id @default(cuid())
+  cropId         String   @map("crop_id")
+  crop           CropListing @relation(fields: [cropId], references: [id])
+  moistureScore  Float?   @map("moisture_score")
+  colorScore     Float?   @map("color_score")
+  sizeScore      Float?   @map("size_score")
+  freshnessScore Float?   @map("freshness_score")
+  imageScore     Float?   @map("image_score")
+  storageScore   Float?   @map("storage_score")
+  finalScore     Float?   @map("final_score")
+  grade          String?
+  remarks        String?
+  assessedAt     DateTime @default(now()) @map("assessed_at")
+
+  @@map("quality_assessments")
+}
+
+model Order {
+  id               String   @id @default(cuid())
+  buyerId          String   @map("buyer_id")
+  buyer            Buyer    @relation(fields: [buyerId], references: [id])
+  cropId           String   @map("crop_id")
+  crop             CropListing @relation(fields: [cropId], references: [id])
+  quantityKg       Float    @map("quantity_kg")
+  totalPrice       Float    @map("total_price")
+  orderStatus      String   @default("PENDING") @map("order_status")
+  paymentStatus    String   @default("UNPAID") @map("payment_status")
+  deliveryLocation String?  @map("delivery_location")
+  notes            String?
+  createdAt        DateTime @default(now()) @map("created_at")
+
+  @@map("orders")
+}
