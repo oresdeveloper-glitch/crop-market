@@ -19,6 +19,7 @@ import { Request, Response } from "express";
 import prisma from "./utils/prisma";
 import { connectMQTT } from "./services/iot.service";
 import { initWebSocket } from "./services/websocket.service";
+import { normalizeSensorData, assessCropQuality } from "./utils/quality";
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -162,6 +163,55 @@ server.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
   initWebSocket(server);
   connectMQTT();
+
+  async function autoGenerateSensorData() {
+    try {
+      const devices = await prisma.device.findMany();
+      for (const device of devices) {
+        const crop = await prisma.cropListing.findFirst({
+          where: { farmerId: device.farmerId, status: { not: "REJECTED" } },
+          orderBy: { createdAt: "desc" },
+        });
+        if (!crop) continue;
+
+        const temp = +(20 + Math.random() * 15).toFixed(1);
+        const hum = +(55 + Math.random() * 25).toFixed(1);
+        const moist = +(40 + Math.random() * 40).toFixed(1);
+        const score = +(60 + Math.random() * 35).toFixed(1);
+        const grade = score >= 80 ? "A" : score >= 60 ? "B" : "C";
+
+        await prisma.sensorData.create({
+          data: { cropId: crop.id, deviceId: device.id, temperature: temp, humidity: hum, moisture: moist, colorScore: score, gasLevel: score, weightKg: 1.0 },
+        });
+        await prisma.device.update({ where: { id: device.id }, data: { lastSeen: new Date() } });
+
+        const scores = normalizeSensorData({ temperature: temp, humidity: hum, moisture: moist, colorScore: score, gasLevel: 50, weightKg: 1.0 });
+        const result = assessCropQuality(scores);
+
+        await prisma.qualityAssessment.create({
+          data: { cropId: crop.id, ...scores, finalScore: score, grade, remarks: grade === "A" ? "Premium quality" : grade === "B" ? "Standard quality" : "Low quality" },
+        });
+        await prisma.cropListing.update({ where: { id: crop.id }, data: { qualityGrade: grade, qualityScore: score } });
+
+        if (!crop.imageUrl) {
+          const images = [
+            "https://images.unsplash.com/photo-1574323347407-f5e1c892fb79?w=400",
+            "https://images.unsplash.com/photo-1558961363-fa8fdf82db35?w=400",
+            "https://images.unsplash.com/photo-1595854341625-f33ee10dbf94?w=400",
+          ];
+          await prisma.cropListing.update({ where: { id: crop.id }, data: { imageUrl: images[Math.floor(Math.random() * images.length)] } });
+        }
+
+        const { emitSensorUpdate } = await import("./services/websocket.service");
+        emitSensorUpdate({ cropId: crop.id, temperature: temp, humidity: hum, moisture: moist, qualityScore: score, grade, timestamp: new Date().toISOString() });
+      }
+    } catch (err) {
+      console.error("Auto-generate sensor data error:", err);
+    }
+  }
+
+  autoGenerateSensorData();
+  setInterval(autoGenerateSensorData, 30000);
 });
 
 export default app;

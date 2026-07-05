@@ -59,6 +59,14 @@ async function main() {
   });
   console.log("Created farmer:", farmer.id);
 
+  await prisma.device.create({
+    data: { farmerId: farmer.id, deviceCode: "ESP32-DEMO-001", deviceType: "ESP32", lastSeen: new Date() },
+  });
+  await prisma.device.create({
+    data: { farmerId: farmer.id, deviceCode: "ESP32-CAM-001", deviceType: "ESP32-CAM", lastSeen: new Date() },
+  });
+  console.log("Created 2 devices for farmer");
+
   const buyerHash = await bcrypt.hash("buyer123", 12);
   const buyerUser = await prisma.user.create({
     data: { fullName: "Demo Buyer", email: "buyer@bity.com", phone: "+255700000002", passwordHash: buyerHash, role: "BUYER" },
