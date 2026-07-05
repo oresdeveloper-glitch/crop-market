@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { Link } from "react-router-dom";
 import { io, Socket } from "socket.io-client";
-import { farmerApi } from "../../services/api";
+import { farmerApi, BACKEND_URL } from "../../services/api";
 import KpiCard from "../../components/common/KpiCard";
 import QualityGauge from "../../components/common/QualityGauge";
 import SensorProgress from "../../components/common/SensorProgress";
@@ -29,7 +29,7 @@ export default function FarmerDashboard() {
   }, []);
 
   useEffect(() => {
-    const socket = io("/", { transports: ["websocket", "polling"] });
+    const socket = io(BACKEND_URL || "/", { transports: ["websocket", "polling"] });
     socketRef.current = socket;
     socket.on("connect", () => setConnected(true));
     socket.on("disconnect", () => setConnected(false));

@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import { io, Socket } from "socket.io-client";
 import QualityGauge from "../../components/common/QualityGauge";
 import KpiCard from "../../components/common/KpiCard";
-import api from "../../services/api";
+import api, { BACKEND_URL } from "../../services/api";
 
 export default function LiveSensor() {
   const [data, setData] = useState<any>(null);
@@ -29,7 +29,7 @@ export default function LiveSensor() {
   };
 
   useEffect(() => {
-    const socket = io("/", { transports: ["websocket", "polling"] });
+    const socket = io(BACKEND_URL || "/", { transports: ["websocket", "polling"] });
     socketRef.current = socket;
     socket.on("connect", () => setConnected(true));
     socket.on("disconnect", () => setConnected(false));

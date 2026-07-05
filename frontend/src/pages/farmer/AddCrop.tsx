@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef, FormEvent } from "react";
 import { useNavigate } from "react-router-dom";
 import { io, Socket } from "socket.io-client";
-import { cropApi, uploadApi } from "../../services/api";
+import { cropApi, uploadApi, BACKEND_URL } from "../../services/api";
 import QualityGauge from "../../components/common/QualityGauge";
 
 export default function AddCrop() {
@@ -23,7 +23,7 @@ export default function AddCrop() {
   const streamRef = useRef<MediaStream | null>(null);
 
   useEffect(() => {
-    const socket = io("/", { transports: ["websocket", "polling"] });
+    const socket = io(BACKEND_URL || "/", { transports: ["websocket", "polling"] });
     socketRef.current = socket;
     socket.on("connect", () => setConnected(true));
     socket.on("disconnect", () => setConnected(false));

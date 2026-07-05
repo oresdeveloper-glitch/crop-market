@@ -93,4 +93,6 @@ export const adminApi = {
     api.patch(`/admin/farmers/${id}/verify`, { verificationStatus }),
 };
 
+export const BACKEND_URL = (import.meta.env.VITE_API_URL || "").replace(/\/api\/?$/, "");
+
 export default api;
