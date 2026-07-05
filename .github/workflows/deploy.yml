@@ -7,8 +7,6 @@ on:
 
 permissions:
   contents: read
-  pages: write
-  id-token: write
 
 env:
   HF_TOKEN_PFX: hf_
@@ -41,11 +39,6 @@ jobs:
         working-directory: frontend
         run: npm run build
 
-      - name: Upload frontend artifact
-        uses: actions/upload-pages-artifact@v3
-        with:
-          path: frontend/dist
-
       - name: Copy frontend dist to backend
         run: |
           mkdir -p backend/public
@@ -57,17 +50,6 @@ jobs:
           name: backend
           path: backend/
 
-  deploy:
-    needs: build
-    runs-on: ubuntu-latest
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
-    steps:
-      - name: Deploy to GitHub Pages
-        id: deployment
-        uses: actions/deploy-pages@v4
-
   deploy-backend:
     needs: build
     runs-on: ubuntu-latest
@@ -76,6 +58,7 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: backend
+          path: /tmp/backend-dist
 
       - name: Deploy backend to Hugging Face Spaces
         env:
@@ -83,11 +66,11 @@ jobs:
         run: |
           git config --global user.email "github-actions@github.com"
           git config --global user.name "GitHub Actions"
-          git clone https://user:$HF_TOKEN@huggingface.co/spaces/${{ env.HF_SPACE }} hf-space
-          cd hf-space
-          rm -rf ./*
-          cp -r ../* .
-          rm -rf node_modules .env
+          git clone https://user:$HF_TOKEN@huggingface.co/spaces/${{ env.HF_SPACE }} /tmp/hf-space
+          cd /tmp/hf-space
+          find . -mindepth 1 -maxdepth 1 -not -name '.git' -exec rm -rf {} +
+          cp -r /tmp/backend-dist/* .
+          rm -rf node_modules .env prisma/dev.db
           git add .
           git diff --quiet && git diff --staged --quiet || git commit -m "Deploy ${{ github.sha }}"
           git push
