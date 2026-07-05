@@ -83,30 +83,6 @@ async function main() {
       },
     });
 
-    await prisma.sensorData.create({
-      data: {
-        cropId: crop.id,
-        temperature: 22 + Math.random() * 8,
-        humidity: 55 + Math.random() * 25,
-        moisture: 30 + Math.random() * 40,
-        colorScore: 60 + Math.random() * 35,
-        gasLevel: Math.random() * 100,
-        weightKg: c.qty,
-      },
-    });
-
-    await prisma.qualityAssessment.create({
-      data: {
-        cropId: crop.id,
-        moistureScore: c.score - 5 + Math.random() * 10,
-        colorScore: c.score - 5 + Math.random() * 10,
-        sizeScore: c.score - 5 + Math.random() * 10,
-        freshnessScore: c.score - 5 + Math.random() * 10,
-        finalScore: c.score,
-        grade: c.grade,
-        remarks: c.grade === "A" ? "Excellent quality" : c.grade === "B" ? "Good quality" : "Standard quality",
-      },
-    });
     console.log("Created crop:", c.name);
   }
 
