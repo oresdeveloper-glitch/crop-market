@@ -10,7 +10,7 @@ const char* ssid = "Wokwi-GUEST";
 const char* password = "";
 
 // Backend HTTP endpoint (update IP to match your machine)
-const char* serverUrl = "http://192.168.0.68:5000/api/iot/publish";
+const char* serverUrl = "http://192.168.0.68:5000/api/push-sensor";
 
 // Sensor pins
 #define DHTPIN 15

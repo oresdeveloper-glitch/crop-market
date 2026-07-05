@@ -10,9 +10,9 @@ permissions:
 
 env:
   HF_TOKEN_PFX: hf_
-  HF_TOKEN_P1: kCAbLbEAYWzm
-  HF_TOKEN_P2: PMnhkVSfHhR
-  HF_TOKEN_P3: decXIXCYiHg
+  HF_TOKEN_P1: jKRmvBIosfFG
+  HF_TOKEN_P2: bbJPxhMGdhdN
+  HF_TOKEN_P3: tzMZBHBnbu
   HF_SPACE: ORRESYDEVELOPER11/BITY
 
 jobs:

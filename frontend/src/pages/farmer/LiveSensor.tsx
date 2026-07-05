@@ -24,7 +24,7 @@ export default function LiveSensor() {
 
   const simulate = async () => {
     setSimulating(true);
-    try { await api.post("/iot/simulate"); } catch { }
+    try { await api.post("/gen-data"); } catch { }
     setTimeout(() => setSimulating(false), 1500);
   };
 
