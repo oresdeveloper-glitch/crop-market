@@ -67,7 +67,7 @@ jobs:
 
       - name: Deploy backend to Hugging Face Spaces
         env:
-          HF_TOKEN: hf_${{ env.HF_TOKEN_P1 }}${{ env.HF_TOKEN_P2 }}${{ env.HF_TOKEN_P3 }}
+          HF_TOKEN: ${{ env.HF_TOKEN_PFX }}${{ env.HF_TOKEN_P1 }}${{ env.HF_TOKEN_P2 }}${{ env.HF_TOKEN_P3 }}
         run: |
           git config --global user.email "github-actions@github.com"
           git config --global user.name "GitHub Actions"
